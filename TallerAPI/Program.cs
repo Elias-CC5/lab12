@@ -7,7 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TallerContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddControllers();
+// Evitar ciclos de referencia en JSON que causan Error 500
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -24,12 +29,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Habilitar Swagger en la raíz correctamente
+// Habilitar Swagger siempre
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Taller API v1"); // Corrección de la ruta con /swagger inicial
-    c.RoutePrefix = string.Empty; // Carga SwaggerUI directamente en la raíz
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Taller API v1");
+    c.RoutePrefix = string.Empty;
 });
 
 app.UseCors("FrontendPolicy");
