@@ -11,7 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configurar CORS con origen concreto
+// Configurar CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
@@ -24,15 +24,17 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Habilitar Swagger
+// Habilitar Swagger siempre (producción y desarrollo)
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Taller API v1");
-    c.RoutePrefix = string.Empty; // Carga SwaggerUI directamente en la raíz
+    c.SwaggerEndpoint("v1/swagger.json", "Taller API v1"); // Ruta relativa corregida
+    c.RoutePrefix = string.Empty; // Carga Swagger directamente en la raíz
 });
 
-app.UseHttpsRedirection();
+// Desactivado UseHttpsRedirection para evitar conflictos con el proxy de Render
+// app.UseHttpsRedirection(); 
+
 app.UseCors("FrontendPolicy");
 app.UseAuthorization();
 app.MapControllers();
